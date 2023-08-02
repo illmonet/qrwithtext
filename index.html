@@ -1,1 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate QR Code with Name and Number</title>
+  <!-- Include the qrious library via the specified CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+</head>
+<body>
+  <h1>Generate QR Code</h1>
+  <form id="qrForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <br>
+    <label for="number">Number:</label>
+    <input type="text" id="number" required>
+    <br>
+    <button type="submit">Generate QR Code</button>
+  </form>
+  <div id="qrCodeContainer"></div>
+  <div id="bottomText"></div>
+  <br>
+  <button id="saveButton">Save QR Code</button>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const qrForm = document.getElementById("qrForm");
+      const qrCodeContainer = document.getElementById("qrCodeContainer");
+      const bottomText = document.getElementById("bottomText");
+      const saveButton = document.getElementById("saveButton");
+      let qr;
+
+      qrForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const number = document.getElementById("number").value;
+
+        // Combine name, "AKPA", and number
+        const combinedString = `${name}  AKPA#${number}`;
+
+        // Create or update the QR code using qrious library
+        if (!qr) {
+          qr = new QRious({
+            value: combinedString,
+            size: 180,
+          });
+          qrCodeContainer.appendChild(qr.canvas);
+        } else {
+          qr.set({
+            value: combinedString,
+          });
+        }
+
+        // Display the combined string (name + " " + "AKPA" + "#" + number) on the screen
+        bottomText.innerText = combinedString;
+      });
+
+      // Save the QR code and the appended text as PNG when the "Save QR Code" button is clicked
+      saveButton.addEventListener("click", function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = qr.canvas.width;
+        canvas.height = qr.canvas.height + 20; // Add extra height for the text
+
+        ctx.drawImage(qr.canvas, 0, 0);
+
+        // Add the appended text (name + " " + "AKPA" + "#" + number) below the QR code
+        ctx.fillStyle = "#000"; // Text color (black in this case)
+        ctx.font = "12px Arial"; // Customize the font size and type as needed
+        ctx.textAlign = "center";
+        ctx.fillText(bottomText.innerText, qr.canvas.width / 2, qr.canvas.height + 15);
+
+        // Create a data URL for the canvas and initiate download
+        const downloadLink = document.createElement("a");
+        downloadLink.href = canvas.toDataURL("image/png");
+        downloadLink.download = "qr-code.png"; // Customize the file name if needed
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      });
+    });
+  </script>
+</body>
+</html>
 
